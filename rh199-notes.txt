@@ -1,0 +1,885 @@
+RH199 Notes
+===========
+
+Command Line Syntax:
+	<COMMAND> [<OPTION>]... [<ARGUMENT>]...
+Where,
+	<OPTION>  - sets the behaviour of the command
+		  - CHARACTER OPTIONS
+			a. starts with a single dash (-)
+			b. represented by A SINGLE character.
+			c. IS CASE SENSITIVE
+			d. Can combine together (-a -b -c => -abc or -cab)
+			e. optionally can be followed by an argument that it is operating on. In that case the argument MUST be right after that option.  (NOTE: in Linux the space between such an option is sometimes optional)
+		  - WORDED OPTIONS
+			a. starts with a double dash (--)
+			b. represented by A WORD.
+			c. IS CASE SENSITIVE
+			eg. --help --me --hello
+		  - can be mixture of worded and character option
+			eg. --filename ABC -p --value=20
+
+	<ARGUMENT> - extra parameters to your cmd, constant value, pathname, device name, network address, Variable, etc.
+
+
+*** space is a separator on the command line
+*** semi-colon(;) is a command separator on the command line
+
+Eg:
+	abc		# abc is the command
+	x=10		# x=10 is the command
+	y = 20		# y is the commmand
+
+	tar -x -v -z -f file1.tar.gz -C /tmp
+	tar -xvz -ffile1.tar.gz -C /tmp
+		Options: 5 (-x -v -z -f -C)
+		Arguments: 2 ( file1.txt.gz, /tmp )
+
+	abc -ca -t -d2 3 --value 5
+		Options: 6 (-c -a -t -d -2 --value)
+			 5 (-c -a -t -d2 --value)
+			   (-c -t -d -2 --value)
+			 4 (-c -t -d --value)
+			 *** depending on the syntax of the command
+		Arguments: 2( 3 and 5)
+			   1( 5)
+
+	ls; date ;cal	# will be treated as below
+	ls<ENTER>
+	date <ENTER>
+	cal<ENTER>
+
+
+Commands:
+=========
+	ls [-laid] [<PATHNAME>]...
+	passwd [--stdin] [<USERNAME>]
+	su - [<USERNAME>]
+	exit   OR  <CTRL> + d
+	whoami
+	id
+	date
+	cat [<PATHNAME>]...
+	
+	head [-[n ]<LINES>] [<PATHNAME>]...
+	tail [-[n ]<LINES>] [<PATHNAME>]...
+	more [<PATHNAME>]
+	less [<PATHNAME>]
+	wc [-lwmc] [<PATHNAME>]...
+	mail [-s <SUBJECT>] <EMAIL_ADD>
+	mutt [-s <SUBJECT>] [-a <PATHNAME>] <EMAIL_ADD>
+	tee <PATHNAME>
+	sort [-r] [-n]
+	lp|lpr
+	grep <PATTERN> [<PATHNAME>]
+	
+	ssh [-i <IDENTITY_FILE>] [<USERNAME>@]<HOSTNAME> [<CMD>]
+		ssh server1.example.com
+		ssh albert@server1.example.com
+		ssh -i myidentity.pem julie@serverX
+		FILES:
+			/etc/ssh/ssh_config		# system wide client config
+			/etc/ssh/sshd_config		# daemon config
+				PermitRootLogin no
+				PasswordAuthentication no
+				# remember to systemctl reload-or-restart sshd after editing
+			~/.ssh				# 700 and owner of the dir
+			~/.ssh/known_hosts
+			~/.ssh/authorized_keys		# must be owned by user and 600
+	ssh-keygen [-t dsa | ecdsa | ed25519 | rsa]
+	ssh-copy-id <USER>@<HOSTNAME>
+
+
+	cp [-a] <SRC_FILE> <DEST_FILE/DIR>
+		cp file1 file2
+		cp file1 /tmp
+	cp [-a|r] <SRC_FILE/DIR>... <DEST_DIR>
+		cp /tmp/file1 /etc/passwd fileX /opt/my_project_dir
+		cp -a ./projX_dir /srv/www/html/proj_y_dir
+		cp -a file1 dir2 dir3
+
+	mv <SRC_FILE> <DEST_FILE/DIR>			# rename/move
+	mv <SRC_FILE/DIR>... <DEST_DIR>
+	
+	cd <DIR>
+
+	mkdir [-p] <PATH>...
+		mkdir -p dir1 dir2/dir3 dir4
+	rmdir [-p] <PATH>...				# only deletes dir if it's empty
+		rmdir -p dir1 dir2/dir3 dir4
+
+	rm [-rf] <PATH>...
+		rm file1 /tmp/file2 /usr/local/myapp
+		rm -r ~/projX 
+
+	touch <PATH>...
+	ln [-s] <SRC_FILE> <LINK_NAME>
+
+	man [<SECTION>] [-k] <KEYWORD>
+		j, k, spacebar, g, G - navigation
+		/[<KEYWORD>], ?[<KEYWORD>], n, N  - search
+		q - quit
+		h - help
+
+	info <KEYWORD>
+	
+	set 			# display all variables & functions
+	env			# displays all environment variables
+
+
+	df [-hiT]
+
+SHELL FEATURES:
+===============
+	Quoting
+	-------
+	'' - ignore everything within the single quote
+	"" - ignore everything within the double quotes EXCEPT substitutions
+	\  - ignore the next character
+
+
+	I/O Redirection (refer to diagram)
+	---------------
+	Output Redirection
+		CMD > <FILENAME>	# overwrite
+		CMD >> <FILENAME>	# append
+	Error Redirection
+		CMD 2> <FILENAME>	# overwrite
+		CMD 2>> <FILENAME>	# append
+	Output & Error Redirection
+		CMD >|>> <FILENAME>  2>|>> <FILENAME>	# redirect to different files
+		CMD >|>> <FILENAME> 2>&1		# redirect to same file (old)
+		CMD &>|>> <FILENAME>			# redirect to same file (new)
+
+	*** anything that is not needed just redirect to /dev/null instead of a file
+
+	Input Redirection
+		CMD < <FILENAME>
+		CMD << <WORD>
+
+
+Filesystem Hierarchical Structure (man 7 hier)
+=================================
+	/ - root of the filesystem (root directory)
+	/boot			directory where the kernel resides
+	
+	/home/<USERNAME>	Users Home Dir
+	/root			root users home dir
+	
+	/tmp			temporary directory used to store files used by the OS(system)
+	/var/tmp		temporary directory used by applications
+	
+	/etc			system wide configuration dir
+	
+	/bin			user binaries/commands
+	/usr/bin
+	
+	/sbin			system binaries/commands
+	/usr/sbin
+	
+	/lib			shared libraries
+	/usr/lib
+	
+	/usr			Unix System Resources NOT USER
+	/usr/local/bin		custom user cmds/scripts
+	/usr/local/sbin		custom system cmds/scripts
+	/usr/local/lib		custom libs
+	
+	/var			Variable
+	/var/spool/mail		email spool dir
+	/var/spool/cups		printer spool dir
+	/var/log		system log dir
+	
+	/proc			doesn't exists on the filesystem (live kernel parameters)
+	/sys			doesn't exists on the filesystem (live kernel parameters)
+	/dev			directory contents are device files
+
+
+
+File Types (first character of the ls -l command)
+==========
+	d - directory/folder
+	l - soft link
+	- - regular file
+	b - block device
+	c - character device
+	p - pipe
+	s - socket
+
+Pathnames
+=========
+	**** / is the separator
+	
+	Absolute Pathname
+		- Always start from the / directory
+		eg. /var/log/messages
+	
+	Relative Pathname
+		- Start from where you are (current directory)
+		eg. Documents/notes, ./Documents/notes, ../file1
+
+Chap 3: User Management
+=======================
+	useradd [-g <PGROUP>] [-G <GROUP>,...] [-c <GECOS>] [-s <CMD>] <USERNAME>
+	usermod [-g <PGROUP>] [[-a] -G <GROUP>,...] [-c <GECOS>] [-s <CMD>] <USERNAME>
+		useradd julie				# default is /bin/bash for <CMD>
+		useradd -s /sbin/nologin julie		# set <CMD> as /sbin/nologin
+	usermod -L|U <USERNAME>
+	passwd -l|u <USERNAME>
+	userdel [-r] <USERNAME>
+
+	groupadd <GROUPNAME>
+	groupmod -g <GID> <GROUPNAME>
+	groupdel <GROUPNAME>
+
+	chage -l <USERNAME>
+	chage -M <MAX> -m <MIN> -W <WARN> -I <INACTIVE> <USERNAME>
+
+	man 5 passwd					# /etc/passwd file format
+	man 5 group					# /etc/group file format
+
+	vipw						# correct method to edit /etc/passwd
+	vigr						# correct method to edit /etc/group
+	visudo						# correct method to edit /etc/sudoers
+
+Chap 4: Permissions
+===================
+	**** GOLDEN KEYWORD = "CONTENTS OF"
+		r	read the CONTENTS OF the FILE(everything-7 types of files)
+		w	make changes to the CONTENTS OF the FILE
+				regular file - edit or append to the file
+				directory    - create, delete or rename a file in the directory
+		x	execute the CONTENTS OF the FILE
+				regular file - you can execute the file (command or script)
+				directory    - you can access the directory (cd into it)
+	
+	****	Precedence (ORDER/SEQUENCE) ***************
+		---------------------------
+		1. process user = file user => file user(owner) permission (THE END)
+		2. process group(s) = file group => file group permission (THE END)
+		3. => file others perm
+	
+	ls -l
+	=====
+		File Type
+		|
+		| ---permissions----
+		| USER  GROUP OTHERS  LINK    USER      GROUP     .....    FILE NAME
+		|
+		- r w x r w x r w x     1     albert    linux     .....    file1
+	
+	
+		Assuming you are user1 and you belong to group1 and linux group, can you cat fileX?
+	
+		- r w - - - - r - -     1     julie     linux    .....    fileX
+		    6     0     4
+	
+	r = 2^2 = 4
+	w = 2^1 = 2
+	x = 2^0 = 1
+	
+	2^2 2^1 2^0
+	 4   2   1
+	 r   w   x   binary  octal(base 8)
+	 -   -   - = 0 0 0 = 0
+	 -   -   x = 0 0 1 = 1
+	 -   w   - = 0 1 0 = 2
+	 -   w   x = 0 1 1 = 3
+	 r   -   - = 1 0 0 = 4
+	 r   -   x = 1 0 1 = 5
+	 r   w   - = 1 1 0 = 6
+	 r   w   x = 1 1 1 = 7
+
+
+	COMMANDS
+	========
+	chown <USER> <PATHNAME>		# only root can change owner
+		chown albert fileX
+	chgrp [<USER>.]<GROUP> <PATHNAME>	# only root and owner of FILE can change
+		chgrp win dir1			# can only change to a group you belong to
+		chgrp root.linux file2
+
+	chmod <WHO><OP><PERM>,... <PATHNAME>	# SYMBOLIC NOTATION
+	      |----no spaces----|
+	chmod <[#]###> <PATHNAME>		# OCTAL/NUMERIC NOTATION
+	where,
+		<WHO> = u - user
+			g - group
+			o - others
+			a - all
+		<OP>  = + - add to
+			- - remove from
+			= - must be exactly
+		<PERM> = r - read
+			 w - write
+			 x - execute
+			 s/t - special perm
+
+		- r w x r w x r w x    fileX
+		         |
+			 V
+		- r w - r - - - - -    fileX
+
+		chmod u=rw,g=r,o=  fileX
+		chmod u-x,go-wx,o-r fileX
+		chmod a-x,go-w,o-r fileX
+		chmod u-x,go=,g+r fileX
+		chmod a=r,u+w,o-r fileX
+		chmod u+w,o-r,a=r fileX		### WRONG!!!!! r--r--r--
+
+		chmod 640 fileX
+
+
+	Default Permission
+	==================
+	file = - r w - r w - r - -
+	         | |   | |   | |
+	dir  = d r w x r w x r - x
+
+	**** RULE ****
+	1. f != x
+	2. d = f = rw
+	3. d = [x]
+
+	1. convert DIRECTORY PERM to BINARY
+		r w x r w x r - x
+		1 1 1 1 1 1 1 0 1
+	2. INVERT all bits
+		0 0 0 0 0 0 0 1 0
+	3. convert to numeric notation, add a 0 in front
+		  0     0     2
+		  0 + 0 0 2
+		  0002
+
+	check with umask
+
+	EXERCISE: Find the umask value if a file permission is to be 640, rw-r-----?
+		file: r w - r - - - - -
+		dir:  r w x r - x - - -
+		1.    1 1 1 1 0 1 0 0 0
+		2.    0 0 0 0 1 0 1 1 1
+		3. 0    0     2     7
+
+	umask 0027
+
+	To make setting umask permanent, edit:
+		1.
+			a) /etc/profile			# system-wide
+			b) /etc/profile.d/		# drop-in config for system-wide
+		2. ~/.bash_profile		# user
+
+	Special Permissions
+	-------------------
+
+	Set User ID	Set Group ID	Sticky
+	   (SUID)	   (SGID)	bit
+
+	  User		Group		Others
+
+	  r w x         r w x           r w x
+	  r w s         r w s           r w t
+	  r w S         r w S           r w T
+
+	Special		Execution
+	   0		  0       = -
+	   0		  1	  = x
+	   1		  0 	  = S/T
+	   1		  1	  = s/t
+
+	FILE as in binary command
+	--------------------------
+	   SUID = only affects a binary command NOT SCRIPT.
+	   	= process executes as Owner of COMMAND, not user
+	   SGID = same as SUID but only affects the GROUP and not the USER
+	Directory
+	---------
+	   SGID = any files created in SGID directory will have it's group changed to be the same as the group of the directory
+	   sticky bit = only the owner of the file can delete the file from a directory that has the sticky bit set
+
+	chmod ug+s,o+t anyfileordir
+	chmod 4### my_command		# suid
+	chmod 2### my_command 		# sgid
+	chmod 1### my_dir		# sticky bit
+
+	rwsr-xr-x
+	  1  0  0	# special bit
+
+	chmod a=rx,u+ws command1
+	chmod 4755 command2
+
+	rwxrws---  dir1
+	  0  1  0	# special bit
+
+	chmod g+s dir1
+	chmod 2770 dir1
+
+	Access Control List(ACL)
+	========================
+	You can set permission for different user and groups for a FILE.
+	when using ls -l the 11th character is +
+	-rw-r-----+  user  group    filename
+	use getfacl instead of ls to list acl permissions
+	
+	RULES!!!
+		1. p.u = f.owner OR f.acl.u => f.u.perm OR f.acl.u.perm (THE END)
+		2. p.g(s) = f.g OR/AND f.acl.g
+			if 1 match => that perm applies
+			if >1 match => refer to the MASK with the matched permission
+		3. f.o.perm (THE END)
+	
+	
+		u1.win,linux,unix
+	
+	
+		file1 albert rw-  user
+		      julie r--  user
+			  linux rw-  group
+			  win   ---  group
+			        ---  others
+					r--  MASK
+	
+		-rw------- albert unix  file1
+		-rw-r-----+ albert unix  file1  with ACL
+		
+		getfacl file1
+	
+	
+	
+	setfacl -m [d:]u|g:<user>|<group>:<perm> FILENAME
+	setfacl -x [d:]u|g:<user>|<group> FILENAME
+	setfacl -b FILENAME
+
+Chap 5: SELINUX
+===============
+	getenforce
+		Enforcing
+		Permissive
+		Disabled
+	setenforce 0|1
+	
+	/etc/selinux/config			# to set default mode
+		
+	ps -Z
+	ls -Z
+	
+	context:	user_u:role_r:type_t
+	
+	semanage fcontext -l
+	semanage fcontext -a -t <CONTEXT_T> '<RE>'
+	semanage boolean -l
+	semanage port -l
+	semanage port -a -t <port_label> -p tcp|udp <PORTNUMBER>
+	
+	
+	grep avc /var/log/audit/audit.log
+	
+	getsebool -l
+	setsebool [-P] <PARAM>=1|0 
+	
+	restorecon -RF <PATH>
+	chcon [-R] -t <TYPE> <PATH>
+	
+	
+	Context -> user_u:role_r:type_t
+		zacc_u:participant_r:class_usage_t
+		kelvin_u:instructor_r:class_admin_t
+		panasonic_u:presenting_r:class_presentation_t
+	
+	RULE
+		fcontext
+		port
+		boolean
+			can class_admin do presentation = TRUE
+			can class_admin do everything = TRUE
+			can class_usage access presentation device = FALSE
+	
+
+Chap 6: Process Management
+==========================
+	Commands
+	--------
+	ps [-ef]		# Unix options
+	ps [auxf]		# BSD options
+	
+	Eg:
+		ps -eo pid,ppid,user,state,pcpu,pmem,nice,rss,vsz,cmd
+
+	kill <PID>
+	pkill -U <USERNAME>
+	pgrep -l -u <USERNAME>
+	top
+
+	nice [-n <VALUE>] <CMD> &	# -20 <= VALUE < 20, the lower the value, the higher the priority
+	renice -n <VALUE> <PID>
+
+
+	Job Control
+	-----------
+	jobs
+	bg %<JOBNO>
+	fg %<JOBNO>
+	<CTRL> + z
+
+	<CMD>... &		# runs a job in the backgroud
+
+
+	Tuned
+	-----
+	Package Name: tuned		# yum install -y tuned
+	systemctl enable --now tuned	# start and enable the service after install
+
+	tuned-adm list			# list all profiles in /etc/tuned.d
+	tuned-adm active		# show which profile is current active profile
+	tuned-adm profile <PROFILE_NAME> 	# set profile as active
+	tuned-adm recommend		# recommend profile for current machine
+
+	tuned-adm off			# turn off tuned
+
+	# Cockpit can manage tuned
+
+
+
+Chap 7: Package Management
+==========================
+	Command
+	-------
+	yum [-y] install|reinstall|update|remove|info <PKG_NAME>|all
+	yum [what]provides <FUNCTION/FILENAME/COMMAND>
+	yum search <KEYWORD>
+	yum history
+	yum list [installed|available|update|all|<PKG_NAME>]
+	rpm -q [-il] [--scripts] {<PKG_NAME>|{-f <PATH>}|{-p <PKG_FILE>}|-a}
+	yum-config-manager --add-repo <REPOSITORY_URL>
+
+	Where,
+		<PKG_FILE> = <PKG_NAME>-<VER>[.<SUBVER>]-<REL>.<ARCH>.rpm
+		<REL>      = <REL_NO>[.<DIST>]
+
+		For RHEL8 only use packages that have EL8 as <DIST>
+		EL7 = Enterprise Linux 7
+		    = Red Hat Enterprise Linux 7
+		    = CentOS 7
+		    = Oracle Enterprise Linux 7
+		    = Scientific Linux 7
+
+		EL8 = RHEL8, CentOS8, OEL8
+
+		eg. abc-2.3.4-5.x86_64.rpm, def-1.0-2.SLES.x86.rpm
+
+
+Chap 8: Storage
+===============
+	A Block Device (BD) can be a whole disk, partition, RAID dev, SAN, CDROM/DVD, floppy, logical volume, file, etc.
+	
+	You can format a BD with a filesystem in order to use it. A filesystem (FS) example, VxFS, NTFS, FAT32, ext2/3/4, xfs, btrfs, ISO9660.
+	
+	To use the FS, you need to mount the FS onto a mount point(directory).
+	
+	RHEL8
+		udevadm settle   - run this cmd after partitioning
+		systemctl daemon-reload		- run this cmd after editing /etc/fstab
+	
+	RHEL5
+		after partitioning just run "partprobe"
+	RHEL6
+		after partitioning on a device that is currently being accessed, REBOOT!!!!
+		after partitioning on a device that is not being accessed, partprobe
+	RHEL7
+		after partitioning just run "partprobe"
+	
+	
+	Device Naming Convention
+	------------------------
+		/dev/hd{a...}[#]		; IDE devices
+			/dev/hda	; primary master whole disk
+			/dev/hdb	; primary slave whole disk
+			/dev/hdc3	; secondary master 3rd partition
+	
+		/dev/sd{a...}[#]		; SATA/USB/SCSI devices
+		/dev/vd{a...}[#]		; VirtIO disks used by VMWARE, HyperV, KVM
+		/dev/xvd{a...}[#]		; Virtual Disk in XEN Virtualization
+	
+		/dev/md#			; RAID devices
+			/dev/md0	;1st raid dev
+			/dev/md1	;2nd raid dev
+	
+		/dev/mt[#]			; Tape drives
+		/dev/st[#]
+	
+		/dev/cciss/c#t#d#		; HP Smart Array
+	
+		/dev/nvme#[p#]			; NVMe storage
+			/dev/nvme0	;1st nvme disk
+			/dev/nvme1	;2nd nvme disk
+			/dev/nvme2p5	;5th partition on the 3rd nvme disk
+	
+		/dev/<VOLUME_GROUP_NAME>/<LOGICAL_VOLUME_NAME>	; LVM
+			/dev/myvg/testing	
+	
+	
+	Commands
+	--------
+	lsblk			- list block devices
+	df -hT			- show mounted filesystems
+	
+	lsof|grep vdb
+	
+	cat /proc/partitions	- list what partitions and devices the kernel see
+	
+	mkfs.<FSTYPE>  <DEVICE>	    - format FS
+	mkswap <DEVICE>
+		mkfs.ext4 /dev/vda2
+		mkfs.xfs /dev/sda3
+		mkfs.vfat /dev/vda3
+		mkswap /dev/sda1
+	
+	vi /etc/fstab
+		#<FS-DEVICE>  <MNT_PT>   <FSTYPE>  <FSOPTS>  <DUMP> <FSCK>
+		/dev/sda1  /opt/share   ext4    defaults,ro  1     2
+		/dev/sdb   swap         swap    defaults     0     0
+
+	use 0 0 for dump & fsck if the filesystem not locally managed
+	use 1 2 for dump & fsck if the fs is managed by admin
+
+	any changes to /etc/fstab, run the systemctl daemon-reload
+	
+	
+	mount [-t <FSTYPE>] [-o <FSOPTS>] [<FS-DEVICE>] [<MNT_PT>]
+	mount -v
+	umount <DEVICE>|<MNT_PT>
+	
+	free
+	swapon -s	# display summary of swap fs in use
+	swapon <DEVICE>		# use swap fs
+	swapoff <DEVICE>	# turn off swap device
+	
+Chap 9: Service & Boot Management
+=================================
+	systemctl -t help	# list all unit types
+	systemctl -t service list-units [--all]		# list service (all) units
+	systemctl -t service list-unit-files		# list service startup status
+
+	systemctl status <NAME>[.<TYPE>]		# check service status
+	systemctl is-enabled <NAME>[.<TYPE>]
+	systemctl is-failed <NAME>[.<TYPE>]
+	systemctl is-active <NAME>[.<TYPE>]
+	systemctl -t service --failed			# list all failed services
+
+	systemctl start|stop|status|restart|reload <NAME>[.<TYPE>]
+	systemctl enable|disable <NAME>[.<TYPE>]
+	systemctl mask|unmask <NAME>[.<TYPE>]
+
+	systemctl list-dependencies <NAME>[.<TYPE>]
+
+	systemctl isolate <TARGET>			# change to target (graphical, multi-user, rescue, emergency)
+	systemctl get-default
+	systemctl set-default <TARGET>
+
+	GRUB2
+	-----
+		grub2-mkconfig > /boot/grub2/grub.cfg	# generate grub config
+		grub2-install <BLOCK_DEVICE>		# install grub2 bootloader
+			grub2-install /dev/sda
+
+
+Chap 10: Networking
+===================
+	service name: NetworkManager
+	start/stop/enable: systemctl start|stop|enable|disable|status NetworkManager
+	related files:
+		- /etc/hosts
+		- /etc/resolv.conf
+		- /etc/sysconfig/network-scripts/ifcfg-*
+	
+	**** 4 setttings
+		1. ip address
+		2. netmask/prefix
+		3. gateway
+			* must be in the same network as ip address(1)
+		4. dns
+
+	COMMANDS
+	--------
+	ip a[ddr]|l[ink]|r[oute]|rule [ls/list/show [<DEV>]]
+		ip a
+		ip addr
+		ip l
+		ip -s l show eth0
+		ip route list
+	ping [-c <COUNT>] <IPADD>
+	route -n
+	netstat -rn
+	tracepath 
+	traceroute [-IT]
+	ss [-tunlp]
+
+	nmcli dev[ice] [show <NAME>]
+	nmcli con[nection] [show|up|down <CON_NAME>]
+	nmcli con[necction] add type <TYPE> \
+		[con-name <NAME>] \
+		[autoconnect] \
+		[ifname <IFNAME>] \
+		[master <IFNAME/ID> slave-type <SLAVE_TYPE>] \
+	nmcli con[nection] reload
+	Where,
+		<TYPE> = ethernet, bridge, bond, team, tun, ... 	# man nmcli
+
+	hostnamectl status|{set-hostname <HOSTNAME>}
+
+Chap 12: Advanced Storage
+=========================
+	Logical Volume Manager (LVM)
+	----------------------------
+		pvcreate  <DEVICE>...
+		pvdisplay <DEVICE>...
+		pvmove <PV>
+		pvremove <DEVICE>...
+		
+		vgscan
+		vgcreate <VG_NAME> <PV>...
+		vgdisplay [-v] <VG_NAME>
+		vgextend <VG_NAME> <PV>...
+		vgreduce <VG_NAME> <PV>...
+		vgremove <VG_NAME>
+		
+		lvcreate -n <LV_NAME> -L <SIZE>M|G <VG_NAME>
+		lvdisplay /dev/<VG_NAME>/<LV_NAME>
+		lvextend [-r] -L [+|-]<SIZE>M|G /dev/<VG_NAME>/<LV_NAME>
+		lvreduce [-r] -L [+|-]<SIZE>M|G /dev/<VG_NAME>/<LV_NAME>
+		lvremove <LV_NAME>
+		
+		
+		mkfs.<FSTYPE> /dev/<VG_NAME>/<LV_NAME>
+		mkfs.<FSTYPE> /dev/mapper/<VG_NAME>-<LV_NAME>
+		
+		ext3/4 - can extend live, can only shrink offline
+		xfs    - can extend live, no such thing as reduce
+	
+	
+	Stratis
+	-------
+		yum install -y stratisd stratis-cli
+		systemctl enable --now stratisd		# this enables and starts the service
+		systemctl status stratisd		# check the service
+		
+		stratis pool|blockdev|filesystem list [<OBJECT_NAME>]
+		stratis pool create <POOL> <BD>...
+		stratis filesystem create <POOL> <FS>
+		stratis filesystem snapshot <POOL> <FS> <SNAP>
+		
+		/etc/fstab
+			/stratis/<POOL>/<FS>  <MNT_PT>  xfs  defaults,x-systemd.requires=stratisd.service  0  0
+		
+		DO NOT FORMAT <FS>. STRATIS WILL HANDLE THE FILESYSTEM FOR YOU.
+	
+	VDO
+	---
+		yum install -y vdo kmod-kvdo
+		
+		vdo create --name=<VDO> --device=<BD> [--vdoLogicalSize=<VOLUME_SIZE>]
+		
+		vdo status --name=<VDO>
+		vdostats [--human-readable]
+		
+		vdo list|start|stop
+
+
+Chap 13: Scheduling
+===================
+	CRONTAB
+	-------
+		DAEMON: crond
+		
+		crontab -l|r|e		#list, remove all, edit
+		syntax of file:
+			minute	hour	day-of-month  month  day-of-week	CMD
+			0-59	0-23	1-31          1-12   0-7		<CMD>....
+		
+	System Jobs
+	-----------
+		Files:
+			/etc/crontab
+			/etc/cron.d/			# calls run-parts to execute /etc/cron.hourly
+			/etc/cron.hourly/		# calls anacron (reads /etc/anacrontab) and process the jobs in daily, weekly and monthly directories.
+			/etc/cron.daily/
+			/etc/cron.weekly/
+			/etc/cron.monthly/
+
+		Important: Make sure scripts in directories are executable(755, a+x).
+		In RHEL 6 and before, anacron is a service. From RHEL7 onwards it's a cron job.
+
+		* an alternative to cron, rhel7 & rhel8 introduces systemd scheduling function that uses systemd timer units
+		  /etc/systemd/system/*.timer
+		  ---------------------------
+		  [Unit]
+		  Description=Some description of unit
+
+		  [Timer]
+		  OnBootSec=15min
+		  OnCalendar=*:00/10		<--- Every 10 minutes based. OnUnitActiveSec is relative.
+
+
+		Eg. sysstat logs are no longer collected by /etc/cron.d/sysstat.
+		    It's done by /usr/lib/systemd/system/sysstat-collect.timer
+
+		Any changes to /etc/systemd, requires a reload
+			systemctl daemon-reload
+
+		You might need to activate the timer unit files after reload.
+			systemctl enable --now <UNIT_NAME>.timer
+
+		Tmpfiles
+		--------
+		Configs:
+			/etc/tmpfiles.d/*.conf
+			/run/tmpfiles.d/*.conf
+			/usr/lib/tmpfiles.d/*.conf
+
+		File Syntax: <Type> <Path> <Mode> <User> <Group> <Age> <Argument>
+
+		man: systemd.timer(5), systemd.timer(7), tmpfiles.d(5)
+
+
+Chap 14: NFS & Automounter
+==========================
+	NFS Client
+	----------
+		mount [-t nfs] [-o <NFS_OPTS>] <SERVER>:<SHARE> <MNT_PT>
+			mount -t nfs -o ro,soft servera:/sharename /opt/projX
+		
+		showmount -e <NFS_SERVER>
+	
+	Automount
+	---------
+		mount serverX:/sharename  /mybase/mymount
+		      <SERVER>  <SHARE>   <BASE>/<MNT_PT>
+		where,
+			<SERVER> = serverX
+			<SHARE>  = /sharename
+			<BASE>	 = /mybase
+			<MNT_PT> = mymount
+		
+		/etc/auto.master.d/<SHARENAME>.autofs:
+			#<BASE>		/etc/auto.<SHARENAME>		# indirect map
+			/mybase		/etc/auto.myconfig
+		
+			#/-		/etc/auto.<SHARENAME>		# direct map
+			/-		/etc/auto.mydirect
+		
+		/etc/auto.myconfig:
+			#<MNT_PT>	-ro,async	<SERVER>:<SHARE>         # indirect map
+			mymount		-rw,sync	serverX:/sharename/mymount
+			yourmnt		-rw,sync	serverX:/sharename/yourmnt
+			his_mnt		-rw,sync	serverX:/sharename/his_mnt
+			#shortcut instead of the 3 lines above
+			*		-rw,sync	serverX:/sharename/&
+		
+		/etc/auto.mydirect
+			#<BASE>/<MNT_PT>  -rw,sync	<SERVER>:<SHARE>	# direct map
+			/mybase/mymount	  -rw,sync	serverX:/sharename/mymount
+		
+		
+		mount serverX:/sharename/mymount /mybase/mymount
+		mount serverX:/sharename/yourmnt /mybase/yourmnt
+		mount serverX:/sharename/his_mnt /mybase/his_mnt
+		
