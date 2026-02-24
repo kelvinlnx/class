@@ -293,7 +293,7 @@ Chap 4: Permissions
 
 	COMMANDS
 	========
-	chown [<USER>:]<GROUP> <PATHNAME>		# only root can change owner
+	chown <USER>[:<GROUP>] <PATHNAME>		# only root can change owner
 		chown albert fileX
 		chown root:linux file2
 	chgrp <USER> <PATHNAME>	# only root and owner of FILE can change
